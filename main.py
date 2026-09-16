@@ -16,6 +16,12 @@ def platform_system():
 
 load_dotenv(override=True)
 
+help_cmd = {
+    "/start": "Restart the bot",
+    "/help": "Displays all commands",
+    "/reboot": "Reboot PC",
+}
+
 bot_token = os.getenv("BOT_TOKEN")
 
 admin_id = int(os.getenv("ADMIN_ID").strip())
@@ -41,7 +47,7 @@ admin_router.message.filter(F.from_user.id == admin_id)
 
 @admin_router.message(CommandStart())
 async def admin_start(message: Message):
-    await message.answer(f"User: {message.from_user.full_name}\nActive sys: {platform_system()}")
+    await message.answer(f"Hi {message.from_user.full_name}\nActive system: {platform_system()}")
     
 @admin_router.message(Command("reboot"))
 async def admin_reboot(message: Message):
@@ -53,6 +59,12 @@ async def admin_reboot(message: Message):
         await message.answer("Rebooting Windows")
         await asyncio.sleep(1)
         await asyncio.create_subprocess_exec("shutdown", "/r", "/t", "0")
+        
+@admin_router.message(Command("help"))
+async def admin_help(message: Message):
+    text_lines = [f"{cmd} — {desc}" for cmd, desc in help_cmd.items()]
+    full_text = "\n".join(text_lines)
+    await message.answer(full_text)
 
 # USER SECTION
 
@@ -60,7 +72,6 @@ user_router = Router()
 
 @user_router.message(CommandStart())
 async def start_handler(message: Message):
-    print(f"[USER] Команда /start от {message.from_user.id}")
     user_name = message.from_user.full_name if message.from_user else "Пользователь"
     await message.answer(f"You are not admin")
 
@@ -68,14 +79,14 @@ dp.include_routers(admin_router, user_router)
 
 async def main():
     
-    print("Запуск поллинга бота...")
+    print("Turning polling")
     try:
         await bot.send_message(
             chat_id=admin_id, 
-            text=f"PC in on\nSystem: {platform_system()}", 
+            text=f"PC turned on\nSystem: {platform_system()}", 
         )
     except Exception as e:
-        print(f"Не удалось отправить стартовое сообщение: {e}")
+        print(f"Couldnt send message: {e}")
     
     await dp.start_polling(bot)
 

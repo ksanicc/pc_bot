@@ -8,7 +8,7 @@ made by ksanicc and using some ai for studying
 
 ### 1. **Clone the repository**
 ```bash
-git clone ksanicc/pc_bot
+git clone https://github.com/ksanicc/pc_bot
 cd pc_bot
 ```
 Create and init venv
