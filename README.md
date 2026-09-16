@@ -16,8 +16,14 @@ cd pc_bot
 Create and init venv
 ```bash
 python -m venv .venv    
-source .venv/bin/activate    # Verify init with "which python" — it should point to .venv/bin/python
+source .venv/bin/activate    # Verify init with "which python", it should point to .venv/bin/python
 ```
+for Windows
+```PowerShell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1    # Verify init with "Get-Command python", it should point to .venv\Scripts\python.exe
+```
+
 Install reqs and copy&redact .env
 ```bash
 python -m pip install -r requirements.txt
