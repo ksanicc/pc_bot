@@ -14,7 +14,7 @@ cd pc_bot
 Create and init venv
 ```bash
 python -m venv .venv    
-source .venv/bin/activate    # Verify init with which python — it should point to .venv/bin/python
+source .venv/bin/activate    # Verify init with "which python" — it should point to .venv/bin/python
 ```
 Install reqs and copy&redact .env
 ```bash
