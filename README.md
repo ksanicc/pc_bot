@@ -65,4 +65,8 @@ After that, you need to include efibootmgr and systemctl to sudoers (to prevent 
 ```bash
 echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/efibootmgr, /usr/bin/systemctl reboot" | sudo tee /etc/sudoers.d/pc_bot_nopass    # you can name "pc_bot_nopass" by whatever you want
 ```
+Give it right permissions
+```bash
+sudo chmod 0440 /etc/sudoers.d/pc_bot_nopass    # you can check syntax by using "sudo visudo -c"
+```
 Now you can freely use /win
