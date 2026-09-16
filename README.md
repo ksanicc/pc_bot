@@ -18,7 +18,7 @@ Create and init venv
 python -m venv .venv    
 source .venv/bin/activate    # Verify init with "which python", it should point to .venv/bin/python
 ```
-for Windows
+for Windows (use Set-ExecutionPolicy Unrestricted -Scope Process if venv not works)
 ```PowerShell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1    # Verify init with "Get-Command python", it should point to .venv\Scripts\python.exe
