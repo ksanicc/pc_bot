@@ -29,10 +29,6 @@ help_cmd = {
 
 bot_token = os.getenv("BOT_TOKEN")
 
-win_order = os.getenv("WIN_ORDER")
-
-win_load = f"sudo efibootmgr -n {win_order} && sudo systemctl reboot -f"
-
 admin_id = int(os.getenv("ADMIN_ID").strip())
 
 bot = Bot(token=bot_token, session=session)
@@ -59,7 +55,7 @@ async def admin_reboot(message: Message):
     if platform_system() == "Linux":
         await message.answer("Rebooting Linux")
         await asyncio.sleep(1)
-        await asyncio.create_subprocess_exec("sudo", "reboot")
+        await asyncio.create_subprocess_exec("sudo", "-n", "/usr/bin/systemctl", "reboot")
     else:
         await message.answer("Rebooting Windows")
         await asyncio.sleep(1)
@@ -74,9 +70,28 @@ async def admin_help(message: Message):
 @admin_router.message(Command("win"))
 async def admin_win(message: Message):
     
+    win_order = os.getenv("WIN_ORDER")
+    
+    if platform_system() != "Linux":
+        await message.answer("Command /win is only available on Linux")
+        return
+    
+    if not win_order:
+        await message.answer("WIN_ORDER not found in .env")
+        return
+    
     await message.answer("Switching to Windows")
     await asyncio.sleep(1)
-    await asyncio.create_subprocess_shell(win_load)
+    
+    efiboot = await asyncio.create_subprocess_exec("sudo", "-n", "/usr/bin/efibootmgr", "-n", win_order)
+    
+    efiboot_check = await efiboot.wait()
+
+    if efiboot_check == 0:
+        await asyncio.create_subprocess_exec("sudo", "-n", "/usr/bin/systemctl", "reboot")
+    else:
+        await message.answer("Error. smth with efiboot")
+        return
 
 
 # USER SECTION
