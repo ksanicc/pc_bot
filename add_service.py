@@ -44,18 +44,19 @@ WantedBy=default.target
 
 
 def win():
-    python_exe = script_dir / ".venv" / "Scripts" / "python.exe"
+    pythonw_exe = script_dir / ".venv" / "Scripts" / "pythonw.exe"
     main_py = script_dir / "main.py"
+
+    if not pythonw_exe.exists():
+        pythonw_exe = script_dir / ".venv" / "Scripts" / "python.exe"
+
+    startup_dir = Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+    bat_file = startup_dir / "run_pc_bot.bat"
+
+    bat_content = f'@echo off\ncd /d "{script_dir}"\nstart "" "{pythonw_exe}" "{main_py}"\n'
     
-    subprocess.run([
-        "schtasks", "/Create",
-        "/TN", "pc_bot",
-        "/TR", f'"{python_exe}" "{main_py}"',
-        "/SC", "ONLOGON",
-        "/F"
-    ], check=True)
-    
-    print("Task pc_bot successfully added to Windows")
+    bat_file.write_text(bat_content, encoding="utf-8")
+    print(f"Added startup:\n{bat_file}")
 
 
 def main():
