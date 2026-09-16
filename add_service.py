@@ -72,7 +72,7 @@ def main():
     if sys_name in actions: 
         actions[sys_name]() # Вызываем нужную функцию
     else:
-        print(f"Неподдерживаемая ОС: {sys_name}")
+        print(f"Unsupported OS: {sys_name}")
 
 if __name__ == "__main__":
     main()
