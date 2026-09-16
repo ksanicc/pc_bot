@@ -54,10 +54,11 @@ def win():
     startup_dir = Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
     bat_file = startup_dir / "run_pc_bot.bat"
 
+    # Запускаем только бота (Xray уже крутится в службах)
     bat_content = f'@echo off\ncd /d "{script_dir}"\nstart "" "{pythonw_exe}" "{main_py}"\n'
     
-    bat_file.write_text(bat_content, encoding="utf-8")
-    print(f"Added startup:\n{bat_file}")
+    bat_file.write_text(bat_content, encoding="cp1251")
+    print(f"bat was made in startup:\n{bat_file}")
 
 
 def main():
