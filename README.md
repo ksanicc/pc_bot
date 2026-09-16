@@ -40,7 +40,7 @@ python add_service.py
 ### 4. **/win Command**
 Its a bit complex thing. If you have DualBoot you can configure /win command to switch to Windows while on Linux without entering GRUB. 
 
-**Need to mention it** the `efibootmgr -n` is a one-time command, after rebooting your order will be as it was cause of "-n" flag. For someone it would be better, either not
+**Need to mention it**, the `efibootmgr -n` is a one-time command, after rebooting your order will be as it was cause of "-n" flag. For someone it would be better, either not
 
 First of all you need to get your Windows BootOrder
 ```bash
