@@ -13,7 +13,7 @@ from aiogram import F, Router
 
 session = None
 
-session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
+#session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
 
 def platform_system():
     return platform.system()
