@@ -26,12 +26,39 @@ cp .env.example .env
 ### 2. **Proxy setup**
 By default, the bot is configured to use a local SOCKS5 proxy (socks5://127.0.0.1:10808).
 
-To change proxy: Edit line 25 in main.py with your custom proxy URL.
+To change proxy: Edit line 16 in main.py with your custom proxy URL.
 
-To disable proxy: Comment out line 25 in main.py.
+To disable proxy: Comment out line 16 in main.py.
 
 ### 3. **Service**
 To add this script in your service, just exec add_service.py
 ```bash
 python add_service.py
 ```
+### 4. **/win Command**
+Its a bit complex thing. If you have DualBoot you can configure /win command to switch to Windows while on Linux without entering GRUB.
+
+First of all you need to get your Windows BootOrder
+```bash
+sudo efibootmgr
+```
+For example:
+```bash
+sudo efibootmgr                                
+[sudo] password for $USER: 
+BootCurrent: 0002
+Timeout: 0 seconds
+BootOrder: 0002,0000,0001,0003,0004,0005
+Boot0000* Windows Boot Manager
+```
+Then you need to change .env WIN_ORDER to your order
+```bash
+BOT_TOKEN=your_bot_token_here
+ADMIN_ID=your_telegram_id_here
+WIN_ORDER=your_win_order
+```
+After that, you need to include efibootmgr and systemctl (if you are using systemd) to sudoers to prevent sudo requesting a passwords for changing bootorder, by making a new directory
+```bash
+echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/efibootmgr, /usr/bin/systemctl reboot" | sudo tee /etc/sudoers.d/pc_bot_nopass    # you can name "pc_bot_nopass" by whatever you want
+```
+Now you can freely use /win

@@ -11,6 +11,10 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.filters import BaseFilter
 from aiogram import F, Router
 
+session = None
+
+session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
+
 def platform_system():
     return platform.system()
 
@@ -20,15 +24,16 @@ help_cmd = {
     "/start": "Restart the bot",
     "/help": "Displays all commands",
     "/reboot": "Reboot PC",
+    "/win": "Switch to Windows while on Linux",
 }
 
 bot_token = os.getenv("BOT_TOKEN")
 
+win_order = os.getenv("WIN_ORDER")
+
+win_load = f"sudo efibootmgr -n {win_order} && sudo systemctl reboot -f"
+
 admin_id = int(os.getenv("ADMIN_ID").strip())
-
-session = None
-
-session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
 
 bot = Bot(token=bot_token, session=session)
 
@@ -65,6 +70,14 @@ async def admin_help(message: Message):
     text_lines = [f"{cmd} — {desc}" for cmd, desc in help_cmd.items()]
     full_text = "\n".join(text_lines)
     await message.answer(full_text)
+
+@admin_router.message(Command("win"))
+async def admin_win(message: Message):
+    
+    await message.answer("Switching to Windows")
+    await asyncio.sleep(1)
+    await asyncio.create_subprocess_shell(win_load)
+
 
 # USER SECTION
 
