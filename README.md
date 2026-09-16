@@ -38,12 +38,9 @@ To add this script in your service, just exec add_service.py
 python add_service.py
 ```
 ### 4. **/win Command**
-<<<<<<< HEAD
 Its a bit complex thing. If you have DualBoot you can configure /win command to switch to Windows while on Linux without entering GRUB. 
-Need to mention it, the `efibootmgr -n` is a one-time command, after rebooting your order will be as it was cause of "-n" flag. For someone it would be better, either not
-=======
-Its a bit complex thing. If you have DualBoot you can configure /win command to switch to Windows while on Linux without entering GRUB.
->>>>>>> 71c9ce9a5b664627c694392c0c176d30b635a949
+
+**Need to mention it** the `efibootmgr -n` is a one-time command, after rebooting your order will be as it was cause of "-n" flag. For someone it would be better, either not
 
 First of all you need to get your Windows BootOrder
 ```bash
@@ -64,11 +61,7 @@ BOT_TOKEN=your_bot_token_here
 ADMIN_ID=your_telegram_id_here
 WIN_ORDER=your_win_order
 ```
-<<<<<<< HEAD
 After that, you need to include efibootmgr and systemctl to sudoers (to prevent sudo requesting a passwords for changing bootorder), by using echo + tee
-=======
-After that, you need to include efibootmgr and systemctl (if you are using systemd) to sudoers to prevent sudo requesting a passwords for changing bootorder, by making a new directory
->>>>>>> 71c9ce9a5b664627c694392c0c176d30b635a949
 ```bash
 echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/efibootmgr, /usr/bin/systemctl reboot" | sudo tee /etc/sudoers.d/pc_bot_nopass    # you can name "pc_bot_nopass" by whatever you want
 ```
