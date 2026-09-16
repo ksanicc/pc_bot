@@ -63,6 +63,6 @@ WIN_ORDER=your_win_order
 ```
 After that, you need to include efibootmgr and systemctl to sudoers (to prevent sudo requesting a passwords for changing bootorder), by using echo + tee
 ```bash
-echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/efibootmgr, /usr/bin/systemctl reboot" | sudo tee /etc/sudoers.d/pc_bot_nopass    # you can name "pc_bot_nopass" by whatever you want
+echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/efibootmgr, /usr/bin/systemctl reboot" | sudo tee /etc/sudoers.d/pc_bot_nopass    # you can name "pc_bot_nopass" by whatever you want
 ```
 Now you can freely use /win
