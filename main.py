@@ -1,6 +1,8 @@
 import platform
 import os
 import asyncio
+import subprocess
+from aiogram.filters import Command
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
@@ -17,6 +19,8 @@ load_dotenv(override=True)
 bot_token = os.getenv("BOT_TOKEN")
 
 admin_id = int(os.getenv("ADMIN_ID").strip())
+
+session = None
 
 session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
 
@@ -38,6 +42,17 @@ admin_router.message.filter(F.from_user.id == admin_id)
 @admin_router.message(CommandStart())
 async def admin_start(message: Message):
     await message.answer(f"User: {message.from_user.full_name}\nActive sys: {platform_system()}")
+    
+@admin_router.message(Command("reboot"))
+async def admin_reboot(message: Message):
+    if platform_system() == "Linux":
+        await message.answer("Rebooting Linux")
+        await asyncio.sleep(1)
+        await asyncio.create_subprocess_exec("sudo", "reboot")
+    else:
+        await message.answer("Rebooting Windows")
+        await asyncio.sleep(1)
+        await asyncio.create_subprocess_exec("shutdown", "/r", "/t", "0")
 
 # USER SECTION
 
@@ -47,13 +62,20 @@ user_router = Router()
 async def start_handler(message: Message):
     print(f"[USER] Команда /start от {message.from_user.id}")
     user_name = message.from_user.full_name if message.from_user else "Пользователь"
-    await message.answer(f"Your name is: {user_name}")
+    await message.answer(f"You are not admin")
 
 dp.include_routers(admin_router, user_router)
 
 async def main():
     
     print("Запуск поллинга бота...")
+    try:
+        await bot.send_message(
+            chat_id=admin_id, 
+            text=f"PC in on\nSystem: {platform_system()}", 
+        )
+    except Exception as e:
+        print(f"Не удалось отправить стартовое сообщение: {e}")
     
     await dp.start_polling(bot)
 
