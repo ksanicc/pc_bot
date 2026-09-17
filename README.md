@@ -20,7 +20,7 @@ python -m venv .venv
 source .venv/bin/activate    # Verify init with "which python", it should point to .venv/bin/python
 ```
 for Windows (use `Set-ExecutionPolicy Unrestricted -Scope Process` if venv not works)
-```PowerShell
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1    # Verify init with "Get-Command python", it should point to .venv\Scripts\python.exe
 ```
@@ -32,7 +32,7 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 Edit `.env`
-```bash
+```env
 BOT_TOKEN=your_bot_token_here
 ADMIN_ID=your_telegram_id_here
 WIN_ORDER=your_win_order
