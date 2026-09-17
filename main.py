@@ -2,6 +2,7 @@ import platform
 import os
 import asyncio
 import subprocess
+import re
 from aiogram.filters import Command
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
@@ -10,7 +11,7 @@ from aiogram.types import Message
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.filters import BaseFilter
 from aiogram import F, Router
-
+from aiogram import types
 session = None
 
 session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
@@ -25,6 +26,7 @@ help_cmd = {
     "/help": "Displays all commands",
     "/reboot": "Reboot PC",
     "/win": "Switch to Windows while on Linux",
+    "/terminal": "Use Linux terminal (zsh), for ex: /terminal --no-log mkdir test",
 }
 
 bot_token = os.getenv("BOT_TOKEN")
@@ -93,7 +95,70 @@ async def admin_win(message: Message):
         await message.answer("Error. smth with efiboot")
         return
 
+@admin_router.message(Command("terminal"))
+async def admin_terminal(message: Message):
+    
+    command_text = message.text.split(maxsplit=1)
+    
+    if len(command_text) < 2:
+        await message.reply("Please enter the command")
+        return
 
+    term_args = command_text[1] 
+    
+    no_log = bool(re.search(r'(?i)\b-nolog\b|\b--no-log\b', term_args))
+    
+    cmd = re.sub(r'(?i)\b-nolog\b|\b--no-log\b', '', term_args).strip()
+    
+    if not cmd:
+        await message.reply("Please enter the command")
+        return
+    
+    try:
+        process = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            executable="/usr/bin/zsh"
+        )
+        
+        try:
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60.0)
+            
+        except asyncio.TimeoutError:
+            process.kill()
+            await message.reply("TimeoutError")
+            return
+        
+        if no_log:
+            code = process.returncode
+            status_icon = "Done" if code == 0 else "Error"
+            await message.reply(f"{status_icon}. (exit code: `{code}`).", parse_mode="Markdown")
+            return
+        
+        out = stdout.decode('utf-8', errors='replace').strip()
+        
+        err = stderr.decode('utf-8', errors='replace').strip()
+        
+        full_output = f"=== STDOUT ===\n{out}\n\n=== STDERR ===\n{err}"
+        
+        if len(full_output) > 3500:
+            if out:
+                out = "⚠️ [Начало вывода обрезано]...\n\n" + out[-3000:]
+            if err:
+                err = "⚠️ [Начало ошибки обрезано]...\n\n" + err[-3000:]
+        response = ""
+        if out:
+            response += f"**STDOUT:**\n```bash\n{out}\n```\n"
+        if err:
+            response += f"**STDERR:**\n```bash\n{err}\n```\n"
+        if not response:
+            response = "Done"
+        await message.reply(response, parse_mode="Markdown")
+        
+    except Exception as e:
+        await message.reply(f"Error:\n`{e}`", parse_mode="Markdown")
+                
 # USER SECTION
 
 user_router = Router()
