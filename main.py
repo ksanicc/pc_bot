@@ -12,9 +12,6 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.filters import BaseFilter
 from aiogram import F, Router
 from aiogram import types
-session = None
-
-session = AiohttpSession(proxy="socks5://127.0.0.1:10808")
 
 def platform_system():
     return platform.system()
@@ -26,12 +23,18 @@ help_cmd = {
     "/help": "Displays all commands",
     "/reboot": "Reboot PC",
     "/win": "Switch to Windows while on Linux",
-    "/terminal": "Use Linux terminal (zsh), for ex: /terminal --no-log mkdir test",
+    "/terminal": "Use Linux terminal, for ex: /terminal mkdir test",
 }
 
 bot_token = os.getenv("BOT_TOKEN")
 
 admin_id = int(os.getenv("ADMIN_ID").strip())
+
+shell = os.getenv("SHELL")
+
+proxy = os.getenv("PROXY")
+
+session = AiohttpSession(proxy=f"{proxy}")
 
 bot = Bot(token=bot_token, session=session)
 
@@ -108,7 +111,11 @@ async def admin_terminal(message: Message):
     
     no_log = bool(re.search(r'(?i)\b-nolog\b|\b--no-log\b', term_args))
     
-    cmd = re.sub(r'(?i)\b-nolog\b|\b--no-log\b', '', term_args).strip()
+    no_timeout = bool(re.search(r'(?i)\b-notimeout\b|\b--no-timeout\b', term_args))
+    
+    cmd = re.sub(r'(?i)\b-nolog\b|\b--no-log\b|\b-notimeout\b|\b--no-timeout\b', '', term_args).strip()
+    
+    timeout_val = None if no_timeout else 600.0
     
     if not cmd:
         await message.reply("Please enter the command")
@@ -119,11 +126,11 @@ async def admin_terminal(message: Message):
             cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            executable="/usr/bin/zsh"
+            executable=shell
         )
         
         try:
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=600.0)
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout_val)
             
         except asyncio.TimeoutError:
             process.kill()
@@ -144,9 +151,9 @@ async def admin_terminal(message: Message):
         
         if len(full_output) > 3500:
             if out:
-                out = "⚠️ [Начало вывода обрезано]...\n\n" + out[-3000:]
+                out = out[-3000:]
             if err:
-                err = "⚠️ [Начало ошибки обрезано]...\n\n" + err[-3000:]
+                err = err[-3000:]
         response = ""
         if out:
             response += f"**STDOUT:**\n```bash\n{out}\n```\n"
