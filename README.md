@@ -41,8 +41,6 @@ SHELL=/usr/bin/your_shell
 ```
 
 ### 2. **Proxy setup**
-By default, the bot is configured to use a local SOCKS5 proxy `socks5://127.0.0.1:10808`.
-
 Edit `PROXY` in `.env` if you need to change proxy or leave it empty
 ```env
 PROXY=your_proxy
