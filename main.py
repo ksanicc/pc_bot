@@ -123,11 +123,11 @@ async def admin_terminal(message: Message):
         )
         
         try:
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60.0)
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=600.0)
             
         except asyncio.TimeoutError:
             process.kill()
-            await message.reply("TimeoutError")
+            await message.reply("TimeoutError(600 seconds passed - command not ended)")
             return
         
         if no_log:
