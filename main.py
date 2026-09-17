@@ -109,13 +109,18 @@ async def admin_terminal(message: Message):
 
     term_args = command_text[1] 
     
-    no_log = bool(re.search(r'(?i)\b-nolog\b|\b--no-log\b', term_args))
+    no_log = bool(re.search(r'(?i)-nolog|--no-log', term_args))
     
-    no_timeout = bool(re.search(r'(?i)\b-notimeout\b|\b--no-timeout\b', term_args))
+    no_timeout = bool(re.search(r'(?i)-notimeout|--no-timeout', term_args))
     
-    cmd = re.sub(r'(?i)\b-nolog\b|\b--no-log\b|\b-notimeout\b|\b--no-timeout\b', '', term_args).strip()
+    bg = bool(re.search(r'(?i)-bg|--background', term_args))
+    
+    cmd = re.sub(r'(?i)\s*(--no-log|-nolog|--no-timeout|-notimeout|-bg|--background)', '', term_args).strip()
     
     timeout_val = None if no_timeout else 600.0
+    
+    if bg:
+        cmd = f"nohup {cmd} >/dev/null 2>&1 &"
     
     if not cmd:
         await message.reply("Please enter the command")

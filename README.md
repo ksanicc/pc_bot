@@ -94,10 +94,12 @@ Supported flags:
 ```text
 --no-log, -nolog    # disables stdout and stderr
 --no-timeout, -notimeout    # disables timeout
+--background, -bg    # makes procces background
 ```
 Examples:
 ```bash
 /terminal uptime
 /terminal -nolog echo "password" | sudo -S dnf update -y
 /terminal --no-timeout --no-log echo "password" | sudo -S dnf upgrade -y
+/terminal -notimeout -bg steam
 ```
