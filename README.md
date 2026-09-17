@@ -24,11 +24,17 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1    # Verify init with "Get-Command python", it should point to .venv\Scripts\python.exe
 ```
 
-Install reqs and copy&redact .env
+Install reqs and copy .env
 ```bash
 python -m pip install -r requirements.txt
 
 cp .env.example .env
+```
+Redact .env
+```bash
+BOT_TOKEN=your_bot_token_here
+ADMIN_ID=your_telegram_id_here
+WIN_ORDER=your_win_order
 ```
 
 ### 2. **Proxy setup**
