@@ -24,6 +24,7 @@ help_cmd = {
     "/reboot": "Reboot PC",
     "/win": "Switch to Windows while on Linux",
     "/terminal": "Use Linux terminal, for ex: /terminal mkdir test",
+    "/status": "Shows CPU usage, RAM usage, Disks usage on Linux"
 }
 
 bot_token = os.getenv("BOT_TOKEN")
@@ -170,7 +171,24 @@ async def admin_terminal(message: Message):
         
     except Exception as e:
         await message.reply(f"Error:\n`{e}`", parse_mode="Markdown")
-                
+        
+@admin_router.message(Command("status"))
+async def admin_status(message: Message):
+    cmd = """echo "=== CPU Load ===" && top -bn1 | grep "Cpu(s)" && echo -e "\n=== RAM ===" && free -h && echo -e "\n=== DISKS ===" && df -h -t ext4 -t btrfs -t xfs"""
+    process = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        executable=shell
+    )
+    
+    stdout, stderr = await process.communicate()
+    
+    out = stdout.decode("utf-8", errors="replace").strip()
+    
+    await message.reply(f"```\n{out}\n```", parse_mode="Markdown")
+    
+    
 # USER SECTION
 
 user_router = Router()

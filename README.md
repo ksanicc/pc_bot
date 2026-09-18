@@ -92,7 +92,7 @@ Supported flags:
 ```text
 --no-log, -nolog    # disables stdout and stderr
 --no-timeout, -notimeout    # disables timeout
---background, -bg    # makes procces background
+--background, -bg    # makes process background
 ```
 Examples:
 ```bash
