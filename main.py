@@ -174,7 +174,7 @@ async def admin_terminal(message: Message):
         
 @admin_router.message(Command("status"))
 async def admin_status(message: Message):
-    cmd = """echo "=== CPU Load ===" && top -bn1 | grep "Cpu(s)" && echo -e "\n=== RAM ===" && free -h && echo -e "\n=== DISKS ===" && df -h -t ext4 -t btrfs -t xfs"""
+    cmd = """echo "CPU Load:\n" && top -bn1 | grep "Cpu(s)" && echo -e "\nRAM:\n" && free -h && echo -e "\nDISKS:\n" && df -h -t ext4 -t btrfs -t xfs"""
     process = await asyncio.create_subprocess_shell(
         cmd,
         stdout=asyncio.subprocess.PIPE,
