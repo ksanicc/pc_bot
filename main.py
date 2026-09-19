@@ -115,17 +115,19 @@ async def admin_terminal(message: Message):
     no_timeout = bool(re.search(r'(?i)-notimeout|--no-timeout', term_args))
     
     bg = bool(re.search(r'(?i)-bg|--background', term_args))
+  
+    cmd = re.sub(r'(?i)(?:\s|^)(?:--no-log|-nolog|--no-timeout|-notimeout|-bg|--background)(?=\s|$)', '', term_args)
     
-    cmd = re.sub(r'(?i)\s*(--no-log|-nolog|--no-timeout|-notimeout|-bg|--background)', '', term_args).strip()
+    cmd = re.sub(r'\s+', ' ', cmd).strip()
     
     timeout_val = None if no_timeout else 600.0
-    
-    if bg:
-        cmd = f"nohup {cmd} >/dev/null 2>&1 &"
     
     if not cmd:
         await message.reply("Please enter the command")
         return
+    
+    if bg:
+            cmd = f"nohup {cmd} >/dev/null 2>&1 &"
     
     try:
         process = await asyncio.create_subprocess_shell(
