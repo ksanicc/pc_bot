@@ -23,7 +23,7 @@ help_cmd = {
     "/help": "Displays all commands",
     "/reboot": "Reboot PC",
     "/win": "Switch to Windows while on Linux",
-    "/terminal": "Use Linux terminal, for ex: /terminal mkdir test",
+    "/terminal": "Use Linux terminal",
     "/status": "Shows CPU usage, RAM usage, Disks usage on Linux"
 }
 
