@@ -122,6 +122,12 @@ async def admin_terminal(message: Message):
     
     timeout_val = None if no_timeout else 600.0
     
+    env = os.environ.copy()
+    if "DISPLAY" not in env:
+        env["DISPLAY"] = ":0"
+    if "XDG_RUNTIME_DIR" not in env:
+        env["XDG_RUNTIME_DIR"] = f"/run/user/{os.getuid()}"
+    
     if not cmd:
         await message.reply("Please enter the command")
         return
@@ -136,6 +142,11 @@ async def admin_terminal(message: Message):
             stderr=asyncio.subprocess.PIPE,
             executable=shell
         )
+        
+        if bg:
+            if not no_log:
+                await message.reply(f"Started in background:\n`{cmd}`", parse_mode="Markdown")
+            return
         
         try:
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout_val)
