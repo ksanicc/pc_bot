@@ -84,7 +84,7 @@ sudo chmod 0440 /etc/sudoers.d/pc_bot_nopass    # you can check syntax by using 
 Now you can freely use `/win`
 
 ### 5. **/terminal Command**
-This command is used to execute zsh/bash commands (Only for Linux now). To change shell edit `.env`
+This command is used to execute shell commands for Linux or cmd.exe commands for Windows. For Linux to change shell edit `.env`
 ```env
 SHELL=/usr/bin/your_shell
 ```
@@ -94,10 +94,17 @@ Supported flags:
 --no-timeout, -notimeout    # disables timeout
 --background, -bg    # makes process background
 ```
-Examples:
+Examples Linux:
 ```bash
 /terminal uptime
 /terminal -nolog echo "password" | sudo -S dnf update -y
 /terminal --no-timeout --no-log echo "password" | sudo -S dnf upgrade -y
 /terminal -notimeout -bg steam
+```
+Examples Windows:
+```cmd
+/terminal -bg steam://run/105600
+/terminal -bg start https://github.com
+/terminal -bg explorer C:\Users
+/terminal ping -n 4 google.com
 ```

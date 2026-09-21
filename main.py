@@ -110,11 +110,9 @@ async def admin_terminal(message: Message):
 
     term_args = command_text[1] 
     
-    no_log = bool(re.search(r'(?i)-nolog|--no-log', term_args))
-    
-    no_timeout = bool(re.search(r'(?i)-notimeout|--no-timeout', term_args))
-    
-    bg = bool(re.search(r'(?i)-bg|--background', term_args))
+    no_log = bool(re.search(r'(?i)\b(-nolog|--no-log)\b', term_args))
+    no_timeout = bool(re.search(r'(?i)\b(-notimeout|--no-timeout)\b', term_args))
+    bg = bool(re.search(r'(?i)\b(-bg|--background)\b', term_args))
   
     cmd = re.sub(r'(?i)(?:\s|^)(?:--no-log|-nolog|--no-timeout|-notimeout|-bg|--background)(?=\s|$)', '', term_args)
     
@@ -122,26 +120,42 @@ async def admin_terminal(message: Message):
     
     timeout_val = None if no_timeout else 600.0
     
-    env = os.environ.copy()
-    if "DISPLAY" not in env:
-        env["DISPLAY"] = ":0"
-    if "XDG_RUNTIME_DIR" not in env:
-        env["XDG_RUNTIME_DIR"] = f"/run/user/{os.getuid()}"
+    is_win = platform_system() == "Windows"
     
+    env = os.environ.copy()
+    
+    if not is_win:
+        if "DISPLAY" not in env:
+            env["DISPLAY"] = ":0"
+        if "XDG_RUNTIME_DIR" not in env:
+            env["XDG_RUNTIME_DIR"] = f"/run/user/{os.getuid()}"
+        
     if not cmd:
         await message.reply("Please enter the command")
         return
     
     if bg:
+        if is_win:
+            cmd = f'cmd /c start "" {cmd}'
+        else:
             cmd = f"nohup {cmd} >/dev/null 2>&1 &"
     
     try:
-        process = await asyncio.create_subprocess_shell(
-            cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            executable=shell
-        )
+        if is_win:
+            process = await asyncio.create_subprocess_shell(
+                cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=env
+            )
+        else:
+            process = await asyncio.create_subprocess_shell(
+                cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                executable=shell,
+                env=env
+            )
         
         if bg:
             if not no_log:
@@ -162,9 +176,11 @@ async def admin_terminal(message: Message):
             await message.reply(f"{status_icon}. (exit code: `{code}`).", parse_mode="Markdown")
             return
         
-        out = stdout.decode('utf-8', errors='replace').strip()
+        encoding = "cp866" if is_win else "utf-8"
         
-        err = stderr.decode('utf-8', errors='replace').strip()
+        out = stdout.decode(encoding, errors='replace').strip()
+        
+        err = stderr.decode(encoding, errors='replace').strip()
         
         full_output = f"=== STDOUT ===\n{out}\n\n=== STDERR ===\n{err}"
         
