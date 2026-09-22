@@ -110,35 +110,73 @@ async def admin_terminal(message: Message):
 
     term_args = command_text[1] 
     
-    no_log = bool(re.search(r'(?i)\b(-nolog|--no-log)\b', term_args))
-    no_timeout = bool(re.search(r'(?i)\b(-notimeout|--no-timeout)\b', term_args))
-    bg = bool(re.search(r'(?i)\b(-bg|--background)\b', term_args))
-  
-    cmd = re.sub(r'(?i)(?:\s|^)(?:--no-log|-nolog|--no-timeout|-notimeout|-bg|--background)(?=\s|$)', '', term_args)
+    no_log = bool(re.search(r'(?i)(?:^|\s)(?:-nolog|--no-log)(?:\s|$)', term_args))
+    no_timeout = bool(re.search(r'(?i)(?:^|\s)(?:-notimeout|--no-timeout)(?:\s|$)', term_args))
+    bg = bool(re.search(r'(?i)(?:^|\s)(?:-bg|--background)(?:\s|$)', term_args))
     
-    cmd = re.sub(r'\s+', ' ', cmd).strip()
+    # await message.reply(f"no_log: {no_log}, no_timeout: {no_timeout}, bg: {bg}")
     
-    timeout_val = None if no_timeout else 600.0
+    cmd = re.sub(r'(?i)(?:--no-log|-nolog|--no-timeout|-notimeout|--background|-bg)', '', term_args)
+    cmd = " ".join(cmd.split()).strip()
+    
+    timeout_val = None if no_timeout else 6.0
     
     is_win = platform_system() == "Windows"
     
     env = os.environ.copy()
     
     if not is_win:
-        if "DISPLAY" not in env:
+        uid = os.getuid()
+
+        if "DISPLAY" not in env or not env["DISPLAY"]:
             env["DISPLAY"] = ":0"
+            
         if "XDG_RUNTIME_DIR" not in env:
-            env["XDG_RUNTIME_DIR"] = f"/run/user/{os.getuid()}"
+            env["XDG_RUNTIME_DIR"] = f"/run/user/{uid}"
+            
+        if "WAYLAND_DISPLAY" not in env:
+            env["WAYLAND_DISPLAY"] = "wayland-0"
+
+        if "DBUS_SESSION_BUS_ADDRESS" not in env:
+            env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path=/run/user/{uid}/bus"
+            
+        if "XAUTHORITY" not in env:
+            home = os.path.expanduser("~")
+            possible_xauth = [
+                os.path.join(home, ".Xauthority"),
+                f"/run/user/{uid}/gdm/Xauthority",
+                f"/tmp/xauth_{uid}"
+            ]
+            for path in possible_xauth:
+                if os.path.exists(path):
+                    env["XAUTHORITY"] = path
+                    break
         
     if not cmd:
         await message.reply("Please enter the command")
         return
     
     if bg:
-        if is_win:
-            cmd = f'cmd /c start "" {cmd}'
-        else:
-            cmd = f"nohup {cmd} >/dev/null 2>&1 &"
+        try:
+            if is_win:
+                bg_cmd = f'start "" {cmd}'
+                await asyncio.create_subprocess_shell(bg_cmd, env=env)
+            else:
+                await asyncio.create_subprocess_shell(
+                    cmd,
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL,
+                    stdin=asyncio.subprocess.DEVNULL,
+                    executable=shell,
+                    env=env
+                )
+            
+            if not no_log:
+                await message.reply(f"Started in background:\n`{cmd}`", parse_mode="Markdown")
+            return
+        except Exception as e:
+            await message.reply(f"Background launch error:\n`{e}`", parse_mode="Markdown")
+            return
     
     try:
         if is_win:
@@ -156,11 +194,6 @@ async def admin_terminal(message: Message):
                 executable=shell,
                 env=env
             )
-        
-        if bg:
-            if not no_log:
-                await message.reply(f"Started in background:\n`{cmd}`", parse_mode="Markdown")
-            return
         
         try:
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout_val)

@@ -1,6 +1,6 @@
 # Telegram Remote Control PC Bot
 
-A cross-platform Telegram bot for remote PC control. Currently only for Windows and Linux on systemd
+A cross-platform Telegram bot for remote PC control. Currently only for Windows and Linux on systemd&Wayland
 
 made by ksanicc and using some ai for studying
 
