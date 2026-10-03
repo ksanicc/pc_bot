@@ -144,9 +144,15 @@ async def admin_terminal(message: Message):
             home = os.path.expanduser("~")
             possible_xauth = [
                 os.path.join(home, ".Xauthority"),
-                f"/run/user/{uid}/gdm/Xauthority",
-                f"/tmp/xauth_{uid}"
+                f"/run/user/{uid}/gdm/Xauthority"
             ]
+            
+            run_user_dir = f"/run/user/{uid}"
+            if os.path.exists(run_user_dir):
+                for fname in os.listdir(run_user_dir):
+                    if fname.startswith("xauth_"):
+                        possible_xauth.append(os.path.join(run_user_dir, fname))
+            
             for path in possible_xauth:
                 if os.path.exists(path):
                     env["XAUTHORITY"] = path
